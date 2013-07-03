@@ -1,4 +1,4 @@
-package com.hyprion.beckon;
+package com.hypirion.beckon;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
