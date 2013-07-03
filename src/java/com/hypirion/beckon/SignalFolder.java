@@ -19,13 +19,16 @@ public class SignalFolder implements SignalHandler {
 
     public void handle(Signal sig) {
         for (Callable c : fns) {
-            boolean res = false;
+            boolean cont = true;
             try {
-                res = (Boolean) c.call(); // No input elems?
+                Object oRes = c.call();
+                if (oRes == false || oRes == null) {
+                    cont = false;
+                }
             }
             catch (Exception e) {}
             finally {
-                if (!res) {
+                if (!cont) {
                     break;
                 }
             }
