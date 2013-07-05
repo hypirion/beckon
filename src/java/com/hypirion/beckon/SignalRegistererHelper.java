@@ -43,6 +43,12 @@ public class SignalRegistererHelper {
         }
     }
 
+    /**
+     * Resets/reinits the signal back to its original signal handler, discarding
+     * all possible changes.
+     *
+     * @param signame the name of the signal to reinit.
+     */
     static synchronized void reinit_signal_handler_BANG_(String signame) {
         if (originalHandlers.containsKey(signame)) {
             SignalHandler original = originalHandlers.get(signame);
@@ -51,6 +57,10 @@ public class SignalRegistererHelper {
         }
     }
 
+    /**
+     * Resets/reinits all the signals back to their original signal handlers,
+     * discarding all possible changes done to them.
+     */
     static synchronized void reinit_all_BANG_() {
         for (String signame : originalHandlers.keySet()) {
             reinit_signal_handler_BANG_(signame);
