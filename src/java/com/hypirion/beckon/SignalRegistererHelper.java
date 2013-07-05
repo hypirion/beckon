@@ -4,16 +4,16 @@ import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 public class SignalRegistererHelper {
 
     /**
-     * A mapping of the signal name to the original signal handler.
+     * A set of modified signal handlers.
      */
-    private final static Map<String, SignalHandler> originalHandlers =
-        new HashMap<String, SignalHandler>();
+    private final static Set<String> modifiedHandlers = new HashSet<String>();
 
     /**
      * Registers the new list of functions to the signal name, and returns the
@@ -38,9 +38,7 @@ public class SignalRegistererHelper {
      */
     static synchronized void register(String signame, List fns) {
         SignalHandler old = reset_BANG_(signame, fns);
-        if (!originalHandlers.containsKey(signame)) {
-            originalHandlers.put(signame, old);
-        }
+        modifiedHandlers.add(signame);
     }
 
     /**
@@ -50,11 +48,10 @@ public class SignalRegistererHelper {
      * @param signame the name of the signal to reinit.
      */
     static synchronized void reinit_signal_handler_BANG_(String signame) {
-        if (originalHandlers.containsKey(signame)) {
-            SignalHandler original = originalHandlers.get(signame);
-            Signal sig = new Signal(signame);
-            Signal.handle(sig, original);
-        }
+        SignalHandler original = SignalHandler.SIG_DFL;
+        Signal sig = new Signal(signame);
+        Signal.handle(sig, original);
+        modifiedHandlers.remove(sig);
     }
 
     /**
@@ -62,7 +59,10 @@ public class SignalRegistererHelper {
      * discarding all possible changes done to them.
      */
     static synchronized void reinit_all_BANG_() {
-        for (String signame : originalHandlers.keySet()) {
+        // To get around the fact that we cannot remove elements from a set
+        // while iterating over it.
+        List<String> signames = new ArrayList(modifiedHandlers);
+        for (String signame : signames) {
             reinit_signal_handler_BANG_(signame);
         }
     }
