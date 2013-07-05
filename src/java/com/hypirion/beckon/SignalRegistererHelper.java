@@ -42,4 +42,13 @@ public class SignalRegistererHelper {
             originalHandlers.put(signame, old);
         }
     }
+
+    static synchronized void reinit_signal_handler_BANG_(String signame) {
+        if (originalHandlers.containsKey(signame)) {
+            SignalHandler original = originalHandlers.get(signame);
+            Signal sig = new Signal(signame);
+            Signal.handle(sig, original);
+            originalHandlers.remove(signame);
+        }
+    }
 }
