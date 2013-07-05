@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 public class SignalFolder implements SignalHandler {
+    final List originalList;
     final private Callable[] fns;
 
     public SignalFolder(List funs) {
@@ -15,6 +16,7 @@ public class SignalFolder implements SignalHandler {
         for (int i = 0; i < fns.length; i++) {
             fns[i] = (Callable) funs.get(i);
         }
+        originalList = funs;
     }
 
     public void handle(Signal sig) {

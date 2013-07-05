@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 
+import clojure.lang.PersistentList;
+
 public class SignalRegistererHelper {
 
     /**
@@ -64,6 +66,20 @@ public class SignalRegistererHelper {
         List<String> signames = new ArrayList<String>(modifiedHandlers);
         for (String signame : signames) {
             reinit_signal_handler_BANG_(signame);
+        }
+    }
+
+    static synchronized List get_signal_folder_list(String signame) {
+        Signal sig = new Signal(signame);
+        // Urgh, no easy way to get current signal handler.
+        // Double-handle to get current one without issues.
+        SignalHandler current = Signal.handle(sig, SignalHandler.SIG_DFL);
+        Signal.handle(sig, current);
+        if (current instanceof SignalFolder) {
+            return ((SignalFolder)current).originalList;
+        }
+        else {
+            return new PersistentList(current);
         }
     }
 }
