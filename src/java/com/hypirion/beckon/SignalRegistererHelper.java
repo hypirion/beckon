@@ -61,7 +61,7 @@ public class SignalRegistererHelper {
     static synchronized void reinit_all_BANG_() {
         // To get around the fact that we cannot remove elements from a set
         // while iterating over it.
-        List<String> signames = new ArrayList(modifiedHandlers);
+        List<String> signames = new ArrayList<String>(modifiedHandlers);
         for (String signame : signames) {
             reinit_signal_handler_BANG_(signame);
         }
