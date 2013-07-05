@@ -48,7 +48,12 @@ public class SignalRegistererHelper {
             SignalHandler original = originalHandlers.get(signame);
             Signal sig = new Signal(signame);
             Signal.handle(sig, original);
-            originalHandlers.remove(signame);
+        }
+    }
+
+    static synchronized void reinit_all_BANG_() {
+        for (String signame : originalHandlers.keySet()) {
+            reinit_signal_handler_BANG_(signame);
         }
     }
 }
