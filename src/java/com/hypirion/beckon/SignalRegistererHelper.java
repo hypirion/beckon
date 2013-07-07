@@ -77,6 +77,8 @@ public class SignalRegistererHelper {
      * the SignalHandler is not a SignalFolder.
      *
      * @param signame The name of the Signal.
+     *
+     * @return A list with the Callables used in the SignalFolder.
      */
     static synchronized List get_signal_folder_list(String signame) {
         Signal sig = new Signal(signame);
