@@ -71,6 +71,13 @@ public class SignalRegistererHelper {
         }
     }
 
+    /**
+     * Returns a list of Callables which is used within the SignalFolder
+     * handling the Signal, or a PersistentList with a Callable SignalHandler if
+     * the SignalHandler is not a SignalFolder.
+     *
+     * @param signame The name of the Signal.
+     */
     static synchronized List get_signal_folder_list(String signame) {
         Signal sig = new Signal(signame);
         // Urgh, no easy way to get current signal handler.
@@ -86,15 +93,34 @@ public class SignalRegistererHelper {
         }
     }
 
+    /**
+     * A Callable SignalHandler is simply a Callable which wraps a
+     * SignalHandler. This is used internally to ensure that people can perform
+     * <code>swap!</code> in Clojure programs without worrying that the default
+     * SignalHandler will cause issues as it's not Callable by default.
+     */
     private static class CallableSignalHandler implements Callable<Boolean> {
         private final Signal sig;
         private final SignalHandler handler;
 
+        /**
+         * Returns a Callable which will call <code>handler.handle(sig)</code>
+         * whenever called.
+         */
         CallableSignalHandler(Signal sig, SignalHandler handler) {
             this.sig = sig;
             this.handler = handler;
         }
 
+        /**
+         * Calls the SignalHandler with the signal provided at construction, and
+         * returns true if the handler doesn't cast any exception. If the
+         * handler cast an exception, false is returned, and if the handler
+         * casts an error, that error is cast.
+         *
+         * @return true if the handler doesn't throw an exception, false
+         * otherwise.
+         */
         @Override
         public Boolean call() {
             try {
