@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 
+import java.util.concurrent.Callable;
+
 import clojure.lang.PersistentList;
 
 public class SignalRegistererHelper {
@@ -79,7 +81,28 @@ public class SignalRegistererHelper {
             return ((SignalFolder)current).originalList;
         }
         else {
-            return new PersistentList(current);
+            Callable<Boolean> wrappedHandler = new CallableSignalHandler(sig, current);
+            return new PersistentList(wrappedHandler);
+        }
+    }
+
+    private static class CallableSignalHandler implements Callable<Boolean> {
+        private final Signal sig;
+        private final SignalHandler handler;
+
+        CallableSignalHandler(Signal sig, SignalHandler handler) {
+            this.sig = sig;
+            this.handler = handler;
+        }
+
+        @Override
+        public Boolean call() {
+            try {
+                handler.handle(sig);
+                return true;
+            } catch (Exception e) { // Not throwable, will still die on errors.
+                return false;
+            }
         }
     }
 }
