@@ -23,7 +23,7 @@ public class SignalRegistererHelper {
      * Registers the new list of functions to the signal name, and returns the
      * old SignalHandler.
      */
-    private static SignalHandler reset_BANG_(String signame, List fns) {
+    private static SignalHandler setHandler(String signame, List fns) {
         Signal sig = new Signal(signame);
         SignalFolder folder = new SignalFolder(fns);
         SignalHandler oldHandler = Signal.handle(sig, folder);
@@ -41,17 +41,16 @@ public class SignalRegistererHelper {
      * @param fns the list of Callables to (potentially) call.
      */
     static synchronized void register(String signame, List fns) {
-        SignalHandler old = reset_BANG_(signame, fns);
+        SignalHandler old = setHandler(signame, fns);
         modifiedHandlers.add(signame);
     }
 
     /**
-     * Resets/reinits the signal back to its original signal handler, discarding
-     * all possible changes.
+     * Resets/reinits the signal to be handled by its original signal handler.
      *
      * @param signame the name of the signal to reinit.
      */
-    static synchronized void reinit_signal_handler_BANG_(String signame) {
+    static synchronized void resetDefaultHandler(String signame) {
         SignalHandler original = SignalHandler.SIG_DFL;
         Signal sig = new Signal(signame);
         Signal.handle(sig, original);
@@ -62,12 +61,12 @@ public class SignalRegistererHelper {
      * Resets/reinits all the signals back to their original signal handlers,
      * discarding all possible changes done to them.
      */
-    static synchronized void reinit_all_BANG_() {
+    static synchronized void resetAll() {
         // To get around the fact that we cannot remove elements from a set
         // while iterating over it.
         List<String> signames = new ArrayList<String>(modifiedHandlers);
         for (String signame : signames) {
-            reinit_signal_handler_BANG_(signame);
+            resetDefaultHandler(signame);
         }
     }
 
@@ -80,7 +79,7 @@ public class SignalRegistererHelper {
      *
      * @return A list with the Callables used in the SignalFolder.
      */
-    static synchronized List get_signal_folder_list(String signame) {
+    static synchronized List getHandlerList(String signame) {
         Signal sig = new Signal(signame);
         // Urgh, no easy way to get current signal handler.
         // Double-handle to get current one without issues.
