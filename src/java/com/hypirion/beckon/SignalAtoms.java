@@ -35,13 +35,13 @@ public class SignalAtoms {
                 List lst = (List) newVal;
                 for (Object o : lst) {
                     if (!(newVal instanceof Callable)) {
-                        throw new IllegalStateException("Invalid reference state");
+                        return false;
                     }
                 }
                 return true;
             }
             else {
-                throw new IllegalStateException("Invalid reference state");
+                return false;
             }
         }
     }
