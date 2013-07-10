@@ -51,10 +51,13 @@ public class SignalRegistererHelper {
      * @param signame the name of the signal to reinit.
      */
     static synchronized void resetDefaultHandler(String signame) {
-        SignalHandler original = SignalHandler.SIG_DFL;
-        Signal sig = new Signal(signame);
-        Signal.handle(sig, original);
-        modifiedHandlers.remove(sig);
+        if (modifiedHandlers.contains(signame)) {
+            SignalHandler original = SignalHandler.SIG_DFL;
+            Signal sig = new Signal(signame);
+            Signal.handle(sig, original);
+            modifiedHandlers.remove(sig);
+            SignalAtoms.getSignalAtom(signame).reset(getHandlerList(signame));
+        }
     }
 
     /**
