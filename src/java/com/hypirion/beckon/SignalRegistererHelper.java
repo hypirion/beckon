@@ -57,6 +57,9 @@ public class SignalRegistererHelper {
             Signal.handle(sig, original);
             modifiedHandlers.remove(sig);
             SignalAtoms.getSignalAtom(signame).reset(getHandlerList(signame));
+            // As the Atom has a watch which calls register, the handle has been
+            // modified again. Perform another handle call to fix this:
+            Signal.handle(sig, original);
         }
     }
 
