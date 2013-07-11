@@ -23,6 +23,8 @@ public class SignalAtoms {
             PersistentHashMap metadata = PersistentHashMap.create(SIGNAL, signame);
             Atom atm = new Atom(list, metadata);
             atm.setValidator(SIGNAL_ATOM_VALIDATOR);
+            SignalAtomWatch saw = new SignalAtomWatch(signame);
+            atm.addWatch(signame, saw);
             atoms.put(signame, atm);
         }
         return atoms.get(signame);
@@ -43,6 +45,20 @@ public class SignalAtoms {
             else {
                 return false;
             }
+        }
+    }
+
+    private static class SignalAtomWatch extends AFn {
+        public final String signame;
+
+        public SignalAtomWatch(String signame) {
+            this.signame = signame;
+        }
+
+        @Override
+        public Object invoke(Object key, Object ref, Object oldState, Object newState) {
+            SignalRegistererHelper.register(signame, (List) newState);
+            return null;
         }
     }
 }
