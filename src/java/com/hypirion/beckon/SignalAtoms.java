@@ -37,6 +37,10 @@ public class SignalAtoms {
         public Object invoke(Object newVal) {
             if (newVal instanceof Seqable) {
                 ISeq seq = ((Seqable) newVal).seq();
+                // An empty seqable returns null.
+                if (seq == null) {
+                    return true;
+                }
                 int count = seq.count();
                 while (count --> 0) {
                     Object o = seq.first();

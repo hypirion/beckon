@@ -16,10 +16,16 @@ public class SignalFolder implements SignalHandler {
 
     public SignalFolder(Seqable funs) {
         ISeq seq = funs.seq();
-        fns = new Callable[seq.count()];
-        for (int i = 0; i < fns.length; i++) {
-            fns[i] = (Callable) seq.first();
-            seq = seq.next();
+        // seq may be null
+        if (seq == null) {
+            fns = new Callable[0];
+        }
+        else {
+            fns = new Callable[seq.count()];
+            for (int i = 0; i < fns.length; i++) {
+                fns[i] = (Callable) seq.first();
+                seq = seq.next();
+            }
         }
         originalList = funs;
     }
