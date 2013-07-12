@@ -1,6 +1,5 @@
 package com.hypirion.beckon;
 
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -11,17 +10,20 @@ import clojure.lang.PersistentHashMap;
 import clojure.lang.Keyword;
 import clojure.lang.AFn;
 import clojure.lang.IFn;
+import clojure.lang.Seqable;
+import clojure.lang.ISeq;
 
 public class SignalAtoms {
     private static final Map<String, Atom> atoms = new HashMap<String, Atom>();
     public static final Keyword SIGNAL = Keyword.intern("signal");
     public static final IFn SIGNAL_ATOM_VALIDATOR = new SignalAtomValidator();
 
-    static final synchronized Atom getSignalAtom(String signame) {
+    public static final synchronized Atom getSignalAtom(String signame) {
         if (!atoms.containsKey(signame)) {
-            Object list = SignalRegistererHelper.getHandlerList(signame);
+            Object list = SignalRegistererHelper.getHandlerSeq(signame);
             PersistentHashMap metadata = PersistentHashMap.create(SIGNAL, signame);
             Atom atm = new Atom(list, metadata);
+            System.out.println(list);
             atm.setValidator(SIGNAL_ATOM_VALIDATOR);
             SignalAtomWatch saw = new SignalAtomWatch(signame);
             atm.addWatch(signame, saw);
@@ -33,13 +35,19 @@ public class SignalAtoms {
     private static class SignalAtomValidator extends AFn {
         @Override
         public Object invoke(Object newVal) {
-            if (newVal instanceof List) {
-                List lst = (List) newVal;
-                for (Object o : lst) {
-                    if (!(newVal instanceof Callable)) {
+            if (newVal instanceof Seqable) {
+                ISeq seq = ((Seqable) newVal).seq();
+                int count = seq.count();
+                while (count --> 0) {
+                    Object o = seq.first();
+                    seq = seq.next();
+                    if (!(o instanceof Callable)) {
                         return false;
                     }
                 }
+                return true;
+            }
+            else if (newVal == null) {
                 return true;
             }
             else {
@@ -57,7 +65,7 @@ public class SignalAtoms {
 
         @Override
         public Object invoke(Object key, Object ref, Object oldState, Object newState) {
-            SignalRegistererHelper.register(signame, (List) newState);
+            SignalRegistererHelper.register(signame, (Seqable) newState);
             return null;
         }
     }

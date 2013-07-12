@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.concurrent.Callable;
 
 import clojure.lang.PersistentList;
+import clojure.lang.Seqable;
 
 public class SignalRegistererHelper {
 
@@ -23,7 +24,7 @@ public class SignalRegistererHelper {
      * Registers the new list of functions to the signal name, and returns the
      * old SignalHandler.
      */
-    private static SignalHandler setHandler(String signame, List fns) {
+    private static SignalHandler setHandler(String signame, Seqable fns) {
         Signal sig = new Signal(signame);
         SignalFolder folder = new SignalFolder(fns);
         SignalHandler oldHandler = Signal.handle(sig, folder);
@@ -40,7 +41,7 @@ public class SignalRegistererHelper {
      * @param signame the signal name to register this list of callables on.
      * @param fns the list of Callables to (potentially) call.
      */
-    static synchronized void register(String signame, List fns) {
+    static synchronized void register(String signame, Seqable fns) {
         SignalHandler old = setHandler(signame, fns);
         modifiedHandlers.add(signame);
     }
@@ -56,7 +57,7 @@ public class SignalRegistererHelper {
             Signal sig = new Signal(signame);
             Signal.handle(sig, original);
             modifiedHandlers.remove(sig);
-            SignalAtoms.getSignalAtom(signame).reset(getHandlerList(signame));
+            SignalAtoms.getSignalAtom(signame).reset(getHandlerSeq(signame));
             // As the Atom has a watch which calls register, the handle has been
             // modified again. Perform another handle call to fix this:
             Signal.handle(sig, original);
@@ -85,7 +86,7 @@ public class SignalRegistererHelper {
      *
      * @return A list with the Callables used in the SignalFolder.
      */
-    static synchronized List getHandlerList(String signame) {
+    static synchronized Seqable getHandlerSeq(String signame) {
         Signal sig = new Signal(signame);
         // Urgh, no easy way to get current signal handler.
         // Double-handle to get current one without issues.

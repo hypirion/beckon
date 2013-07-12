@@ -7,14 +7,19 @@ import java.util.List;
 
 import java.util.concurrent.Callable;
 
+import clojure.lang.Seqable;
+import clojure.lang.ISeq;
+
 public class SignalFolder implements SignalHandler {
-    final List originalList;
+    final Seqable originalList;
     final private Callable[] fns;
 
-    public SignalFolder(List funs) {
-        fns = new Callable[funs.size()];
+    public SignalFolder(Seqable funs) {
+        ISeq seq = funs.seq();
+        fns = new Callable[seq.count()];
         for (int i = 0; i < fns.length; i++) {
-            fns[i] = (Callable) funs.get(i);
+            fns[i] = (Callable) seq.first();
+            seq = seq.next();
         }
         originalList = funs;
     }
