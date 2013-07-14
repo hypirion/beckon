@@ -18,12 +18,17 @@ public class SignalAtoms {
     public static final Keyword SIGNAL = Keyword.intern("signal");
     public static final IFn SIGNAL_ATOM_VALIDATOR = new SignalAtomValidator();
 
-    public static final synchronized Atom getSignalAtom(String signame) {
+    public static final synchronized Atom getSignalAtom(String signame)
+        throws SignalHandlerNotFoundException{
         if (!atoms.containsKey(signame)) {
-            Object list = SignalRegistererHelper.getHandlerSeq(signame);
+            try {
+                Object list = SignalRegistererHelper.getHandlerSeq(signame);
+            }
+            catch (LinkageError le) {
+                throw new SignalHandlerNotFoundException();
+            }
             PersistentHashMap metadata = PersistentHashMap.create(SIGNAL, signame);
             Atom atm = new Atom(list, metadata);
-            System.out.println(list);
             atm.setValidator(SIGNAL_ATOM_VALIDATOR);
             SignalAtomWatch saw = new SignalAtomWatch(signame);
             atm.addWatch(signame, saw);
