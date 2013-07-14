@@ -15,9 +15,26 @@ import clojure.lang.ISeq;
 
 public class SignalAtoms {
     private static final Map<String, Atom> atoms = new HashMap<String, Atom>();
+
+    /**
+     * The keyword <code>:signal</code>.
+     */
     public static final Keyword SIGNAL = Keyword.intern("signal");
+
+    /**
+     * A standard Atom validator function which tests whether the new value is a
+     * Seqable, where each element in the Seqable implements Callable.
+     */
     public static final IFn SIGNAL_ATOM_VALIDATOR = new SignalAtomValidator();
 
+    /**
+     * Returns a Clojure Atom containing a Seqable. The Seqable represents a
+     * list of functions where the functions are called in order whenever a
+     * Signal by the type <code>signame</code> is received by this process.
+     *
+     * @exception SignalHandlerNotFoundException if this code is unable to
+     * detect a SignalHandler and/or a Signal class.
+     */
     public static final synchronized Atom getSignalAtom(String signame)
         throws SignalHandlerNotFoundException{
         if (!atoms.containsKey(signame)) {
