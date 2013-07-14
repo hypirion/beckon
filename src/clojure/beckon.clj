@@ -4,7 +4,8 @@
 (defn signal-atom
   "Returns the beckon atom of the signal with the name signal-name. The changes
   in the atom returned is reflected back to the signal handling, but NOT vice
-  versa.
+  versa. Multiple calls for the same signal atom will return the
+  same (identical) atom.
 
   A beckon atom is an atom containing a Seqable Clojure collection, where all
   the elements in the Seqable collection must be Callable. Clojure functions are
