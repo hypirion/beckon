@@ -139,4 +139,9 @@ public class SignalRegistererHelper {
             }
         }
     }
+
+    static void raise(String signame) {
+        Signal sig = new Signal(signame);
+        Signal.raise(sig);
+    }
 }
