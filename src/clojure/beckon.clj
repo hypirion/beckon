@@ -18,4 +18,4 @@
   "Takes a function of no arguments, and returns a function taking no arguments
   which calls f and returns false. f has presumably side effects."
   [f]
-  (fn [] (f) true))
+  (fn [] (f) false))
