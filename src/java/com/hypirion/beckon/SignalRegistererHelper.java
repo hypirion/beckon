@@ -49,7 +49,8 @@ public class SignalRegistererHelper {
      *
      * @param signame the name of the signal to reinit.
      */
-    static synchronized void resetDefaultHandler(String signame) {
+    static synchronized void resetDefaultHandler(String signame)
+        throws SignalHandlerNotFoundException {
         if (modifiedHandlers.contains(signame)) {
             SignalHandler original = SignalHandler.SIG_DFL;
             Signal sig = new Signal(signame);
@@ -66,7 +67,7 @@ public class SignalRegistererHelper {
      * Resets/reinits all the signals back to their original signal handlers,
      * discarding all possible changes done to them.
      */
-    static synchronized void resetAll() {
+    static synchronized void resetAll() throws SignalHandlerNotFoundException {
         // To get around the fact that we cannot remove elements from a set
         // while iterating over it.
         List<String> signames = new ArrayList<String>(modifiedHandlers);
