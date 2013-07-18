@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 
-import java.util.concurrent.Callable;
-
 import clojure.lang.PersistentList;
 import clojure.lang.Seqable;
 
@@ -32,14 +30,14 @@ public class SignalRegistererHelper {
     }
 
     /**
-     * Registers the signal name to a List of Callables, where each callable
+     * Registers the signal name to a List of Runnables, where each callable
      * returns an Object. The signal handling is performed as follows: The first
      * callable is called, and if it returns a value equal to <code>false</code>
      * or <code>null</code> it will stop. Otherwise it will repeat on the next
      * callable, until there are no more left.
      *
      * @param signame the signal name to register this list of callables on.
-     * @param fns the list of Callables to (potentially) call.
+     * @param fns the list of Runnables to (potentially) call.
      */
     static synchronized void register(String signame, Seqable fns) {
         SignalHandler old = setHandler(signame, fns);
@@ -78,13 +76,13 @@ public class SignalRegistererHelper {
     }
 
     /**
-     * Returns a list of Callables which is used within the SignalFolder
-     * handling the Signal, or a PersistentList with a Callable SignalHandler if
+     * Returns a list of Runnables which is used within the SignalFolder
+     * handling the Signal, or a PersistentList with a Runnable SignalHandler if
      * the SignalHandler is not a SignalFolder.
      *
      * @param signame The name of the Signal.
      *
-     * @return A list with the Callables used in the SignalFolder.
+     * @return A list with the Runnables used in the SignalFolder.
      */
     static synchronized Seqable getHandlerSeq(String signame) {
         Signal sig = new Signal(signame);
@@ -96,26 +94,26 @@ public class SignalRegistererHelper {
             return ((SignalFolder)current).originalList;
         }
         else {
-            Callable<Boolean> wrappedHandler = new CallableSignalHandler(sig, current);
+            Runnable wrappedHandler = new RunnableSignalHandler(sig, current);
             return new PersistentList(wrappedHandler);
         }
     }
 
     /**
-     * A Callable SignalHandler is simply a Callable which wraps a
+     * A Runnable SignalHandler is simply a Runnable which wraps a
      * SignalHandler. This is used internally to ensure that people can perform
      * <code>swap!</code> in Clojure programs without worrying that the default
-     * SignalHandler will cause issues as it's not Callable by default.
+     * SignalHandler will cause issues as it's not Runnable by default.
      */
-    private static class CallableSignalHandler implements Callable<Boolean> {
+    private static class RunnableSignalHandler implements Runnable {
         private final Signal sig;
         private final SignalHandler handler;
 
         /**
-         * Returns a Callable which will call <code>handler.handle(sig)</code>
+         * Returns a Runnable which will call <code>handler.handle(sig)</code>
          * whenever called.
          */
-        CallableSignalHandler(Signal sig, SignalHandler handler) {
+        RunnableSignalHandler(Signal sig, SignalHandler handler) {
             this.sig = sig;
             this.handler = handler;
         }
@@ -130,13 +128,8 @@ public class SignalRegistererHelper {
          * otherwise.
          */
         @Override
-        public Boolean call() {
-            try {
-                handler.handle(sig);
-                return true;
-            } catch (Exception e) { // Not throwable, will still die on errors.
-                return false;
-            }
+        public void run() {
+            handler.handle(sig);
         }
     }
 

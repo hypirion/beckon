@@ -1,7 +1,5 @@
 package com.hypirion.beckon;
 
-import java.util.List;
-
 public class SignalRegisterer {
 
     /**

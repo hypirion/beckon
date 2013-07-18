@@ -3,8 +3,6 @@ package com.hypirion.beckon;
 import java.util.Map;
 import java.util.HashMap;
 
-import java.util.concurrent.Callable;
-
 import clojure.lang.Atom;
 import clojure.lang.PersistentHashMap;
 import clojure.lang.Keyword;
@@ -23,7 +21,7 @@ public class SignalAtoms {
 
     /**
      * A standard Atom validator function which tests whether the new value is a
-     * Seqable, where each element in the Seqable implements Callable.
+     * Seqable, where each element in the Seqable implements Runnable.
      */
     public static final IFn SIGNAL_ATOM_VALIDATOR = new SignalAtomValidator();
 
@@ -67,7 +65,7 @@ public class SignalAtoms {
                 while (count --> 0) {
                     Object o = seq.first();
                     seq = seq.next();
-                    if (!(o instanceof Callable)) {
+                    if (!(o instanceof Runnable)) {
                         return false;
                     }
                 }

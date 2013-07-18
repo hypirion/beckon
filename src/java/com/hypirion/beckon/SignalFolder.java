@@ -5,25 +5,23 @@ import sun.misc.SignalHandler;
 
 import java.util.List;
 
-import java.util.concurrent.Callable;
-
 import clojure.lang.Seqable;
 import clojure.lang.ISeq;
 
 public class SignalFolder implements SignalHandler {
     final Seqable originalList;
-    final private Callable[] fns;
+    final private Runnable[] fns;
 
     public SignalFolder(Seqable funs) {
         ISeq seq = funs.seq();
         // seq may be null
         if (seq == null) {
-            fns = new Callable[0];
+            fns = new Runnable[0];
         }
         else {
-            fns = new Callable[seq.count()];
+            fns = new Runnable[seq.count()];
             for (int i = 0; i < fns.length; i++) {
-                fns[i] = (Callable) seq.first();
+                fns[i] = (Runnable) seq.first();
                 seq = seq.next();
             }
         }
@@ -31,19 +29,13 @@ public class SignalFolder implements SignalHandler {
     }
 
     public void handle(Signal sig) {
-        for (Callable c : fns) {
+        for (Runnable r : fns) {
             boolean cont = true;
             try {
-                Object oRes = c.call();
-                if (oRes == false || oRes == null) {
-                    cont = false;
-                }
+                r.run();
             }
-            catch (Exception e) {}
-            finally {
-                if (!cont) {
-                    break;
-                }
+            catch (Exception e) {
+                break;
             }
         }
     }
