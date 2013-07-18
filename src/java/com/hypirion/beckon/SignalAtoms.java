@@ -36,8 +36,9 @@ public class SignalAtoms {
     public static final synchronized Atom getSignalAtom(String signame)
         throws SignalHandlerNotFoundException{
         if (!atoms.containsKey(signame)) {
+            Object list;
             try {
-                Object list = SignalRegistererHelper.getHandlerSeq(signame);
+                list = SignalRegistererHelper.getHandlerSeq(signame);
             }
             catch (LinkageError le) {
                 throw new SignalHandlerNotFoundException();
