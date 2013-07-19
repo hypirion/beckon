@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 
-import clojure.lang.PersistentList;
+import clojure.lang.PersistentHashSet;
 import clojure.lang.Seqable;
 
 public class SignalRegistererHelper {
@@ -77,8 +77,8 @@ public class SignalRegistererHelper {
     }
 
     /**
-     * Returns a list of Runnables which is used within the SignalFolder
-     * handling the Signal, or a PersistentList with a Runnable SignalHandler if
+     * Returns a set of Runnables which is used within the SignalFolder
+     * handling the Signal, or a PersistentSet with a Runnable SignalHandler if
      * the SignalHandler is not a SignalFolder.
      *
      * @param signame The name of the Signal.
@@ -96,7 +96,7 @@ public class SignalRegistererHelper {
         }
         else {
             Runnable wrappedHandler = new RunnableSignalHandler(sig, current);
-            return new PersistentList(wrappedHandler);
+            return PersistentHashSet.create(wrappedHandler);
         }
     }
 
