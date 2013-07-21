@@ -5,8 +5,8 @@ import sun.misc.SignalHandler;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
 
 import clojure.lang.PersistentHashSet;
 import clojure.lang.Seqable;
@@ -16,7 +16,8 @@ public class SignalRegistererHelper {
     /**
      * A set of modified signal handlers.
      */
-    private final static Set<String> modifiedHandlers = new HashSet<String>();
+    private final static Map<String, SignalHandler> originalHandlers =
+        new HashMap<String, SignalHandler>();
 
     /**
      * Registers the new list of functions to the signal name, and returns the
@@ -41,7 +42,9 @@ public class SignalRegistererHelper {
      */
     static synchronized void register(String signame, Seqable fns) {
         SignalHandler old = setHandler(signame, fns);
-        modifiedHandlers.add(signame);
+        if (!originalHandlers.containsKey(signame)) {
+            originalHandlers.put(signame, old);
+        }
     }
 
     /**
@@ -51,11 +54,11 @@ public class SignalRegistererHelper {
      */
     static synchronized void resetDefaultHandler(String signame)
         throws SignalHandlerNotFoundException {
-        if (modifiedHandlers.contains(signame)) {
-            SignalHandler original = SignalHandler.SIG_DFL;
+        if (originalHandlers.containsKey(signame)) {
+            SignalHandler original = originalHandlers.get(signame);
             Signal sig = new Signal(signame);
             Signal.handle(sig, original);
-            modifiedHandlers.remove(sig);
+            originalHandlers.remove(sig);
             SignalAtoms.getSignalAtom(signame).reset(getHandlerSeq(signame));
             // As the Atom has a watch which calls register, the handle has been
             // modified again. Perform another handle call to fix this:
@@ -70,7 +73,7 @@ public class SignalRegistererHelper {
     static synchronized void resetAll() throws SignalHandlerNotFoundException {
         // To get around the fact that we cannot remove elements from a set
         // while iterating over it.
-        List<String> signames = new ArrayList<String>(modifiedHandlers);
+        List<String> signames = new ArrayList<String>(originalHandlers.keySet());
         for (String signame : signames) {
             resetDefaultHandler(signame);
         }
