@@ -23,26 +23,29 @@ through `nrepl-jack-in` or similar methods, then write the following:
   (reset! (beckon/signal-atom "INT") #{print-function}))
 ```
 
-That's it—it's not harder than that. Of course, you may not believe me, so it's
-good that we can confirm whether it's possible by using the `raise!` function:
+That's it—it's not harder than that. To confirm whether this works or not, we
+can use the `raise!` function, which will raise a POSIX signal to the VM:
 
 ```clj
 (beckon/raise! "INT")
 ; prints nothing
 ```
 
-You may think I've really lied, but the thing is, this is ran on a newly spawned
-thread with maximum priority. As such, it will not show in the nrepl window.
-Move over to the `*nrepl-server*` buffer instead, and you'll see the message. In
-case you really do not believe me, you could try out to raise the SIGTERM signal
-instead:
+So why didn't `raise!` print out anything? Whenever the JVM receives a signal,
+it decides to start up a new thread with maximum priority and do the signal
+handling asynchronously. As such, it will not show in the nrepl window. Move
+over to the `*nrepl-server*` buffer instead, and you'll see the message.
+
+By default, things like SIGTERM and SIGINT will terminate the running VM, so be
+a bit careful. We can of course play around with it in a REPL:
 
 ```clj
 (beckon/raise! "TERM")
 ; NB: This will terminate nREPL.
 ```
 
-And if you didn't and want to go back to the original setup, use `reinit!`:
+And if you somehow managed to screw up the signal handling and want to go back
+to the default, that's possible too:
 
 ```clj
 (beckon/reinit! "INT")
@@ -51,7 +54,7 @@ And if you didn't and want to go back to the original setup, use `reinit!`:
 ; NB: This will terminate your JVM process.
 ```
 
-And well, that's really all you need in order to work with beckon.
+And well, that's really all you need to know in order to work with beckon.
 
 ## Usage
 
@@ -104,18 +107,41 @@ to check out that your signal handlers work as intended.
 
 ### `reinit!` and `reinit-all!`
 
-TODO
+`reinit!` and `reinit-all!` are functions which reset the signal handlers back
+to their original state when the JVM was started. `reinit!` takes a single
+argument, the signal to reset, whereas `reinit-all!` takes zero and resets every
+single one.
 
 ## How is a signal handled?
 
-TODO
+In the JVM, whenever a signal is received, the VM starts up a new thread at
+`Thread.MAX_PRIORITY`, and executes it asynchronously. That's why we don't see
+any printing in nREPL, although it should work fine in command-line programs. I
+would recommend, however, to have some sort of logger or printer a signal
+handler sends a message to, instead of having the signal handler printing
+manually.
 
-## Pitfalls
+## "FAQ"
 
-TODO, mention:
+People using this library may get some issues when using it. If this list of
+common problems doesn't help you, please add a [new issue][new-issue] and we'll
+see what we can do about it!
 
-* infinite sequences
-* keywords, symbols and other ifns which silently throw stuff.
+**Q:** My infinite sequence doesn't work with this library, why is that?  
+**A:** This library is designed to be easy to use for Clojure developers,
+  without sacrificing speed. As such, the collection of functions are realized
+  within Beckon and stored within a Java array. An infinite sequence doesn't fit
+  in a Java array, sadly.
+
+**Q:** For some reason, keywords, symbols and other things which are clearly not
+  functions are allowed in the collection of functions! Why is that?  
+**A:** Keywords, symbols and some persistent collections implement the `IFn`
+  interface in Clojure, which automatically means that they do in fact implement
+  Runnable. But, as mentioned, while they still implement Runnable, that won't
+  mean they are actually able to send back something of value. This is intended
+  to be fixed in a later version.
+
+[new-issue]: https://github.com/hyPiRion/beckon/issues/new "Add a new issue to Beckon"
 
 ## License
 
