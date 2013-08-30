@@ -9,7 +9,7 @@ simple fashion.
 Add the following dependency to your `project.clj` file:
 
 ```clj
-[beckon "0.1.0"]
+[beckon "0.1.1"]
 ```
 
 Say you want to grab `SIGINT` and, say, print "Hahah, nothing can stop me!"
