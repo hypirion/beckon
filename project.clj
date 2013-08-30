@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.5.1"]]
   :source-paths ["src/clojure"]
   :java-source-paths ["src/java"]
+  :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
   :profiles {:dev {:plugins [[codox "0.6.4"]]
                    :codox {:sources ["src/clojure"]
                            :output-dir "codox"}}})
