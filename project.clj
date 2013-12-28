@@ -1,5 +1,5 @@
-(defproject beckon "0.1.1"
-  :description "Handle POSIX signals in Clojure with style and grace."
+(defproject beckon "0.2.0-SNAPSHOT"
+  :description "Handle POSIX signals in Clojure."
   :url "https://github.com/hyPiRion/beckon"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
